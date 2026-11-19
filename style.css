@@ -327,3 +327,306 @@ model-viewer {
 
 
 
+
+/* =====================================================================
+   Design-Update: Liquid-Glass-Menü, hochwertige Schrift, schönere Buttons
+   (überschreibt die Regeln weiter oben)
+   ===================================================================== */
+
+:root {
+    --font-serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    --ink: #1c1b1a;
+    --ink-soft: rgba(28, 27, 26, 0.68);
+    --glass-bg: rgba(255, 255, 255, 0.42);
+    --glass-bg-strong: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.7);
+    --glass-shadow: 0 10px 40px rgba(20, 30, 50, 0.14), 0 2px 8px rgba(20, 30, 50, 0.08);
+    --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -1px 0 rgba(255, 255, 255, 0.25);
+    --glass-blur: blur(22px) saturate(180%);
+}
+
+body {
+    font-family: var(--font-sans);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+}
+
+#loading-screen {
+    font-family: var(--font-serif);
+    font-size: 1.6rem;
+    letter-spacing: 0.02em;
+}
+#loading-screen b { font-weight: 500; }
+
+/* ---------- Navigation: schwebende Glas-Leiste ---------- */
+#navbar {
+    top: 16px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: calc(100% - 32px);
+    max-width: 1100px;
+    height: 60px;
+    padding: 0 10px 0 26px;
+    border-radius: 999px;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow), var(--glass-highlight);
+}
+
+.sarah-wewer {
+    font-family: var(--font-serif);
+    font-size: 1.55rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+#navigation-buttons {
+    gap: 4px;
+    background: none;
+}
+
+.navigation-button,
+.dropdown,
+.dropbtn {
+    background: none;
+}
+
+.navigation-button {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    padding: 11px 20px;
+    border-radius: 999px;
+    white-space: nowrap;
+    transition: background-color 0.25s ease, box-shadow 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.navigation-button:hover,
+.dropdown.open .navigation-button,
+.dropdown:hover .navigation-button {
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: var(--glass-highlight), 0 1px 4px rgba(20, 30, 50, 0.08);
+}
+
+.chevron {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-left: 8px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: translateY(-3px) rotate(45deg);
+    transition: transform 0.25s ease;
+}
+.dropdown:hover .chevron,
+.dropdown.open .chevron {
+    transform: translateY(1px) rotate(-135deg);
+}
+
+/* Dropdown mit den Räumen */
+.dropdown-content {
+    top: calc(100% + 12px);
+    right: 0;
+    min-width: 260px;
+    padding: 8px;
+    border-radius: 22px;
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow), var(--glass-highlight);
+}
+/* unsichtbare Brücke, damit das Menü beim Runterfahren mit der Maus offen bleibt */
+.dropdown-content::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -14px;
+    height: 14px;
+}
+.dropdown.open .dropdown-content { display: block; }
+
+.dropdown-content button,
+.dropdown-content .room-button {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--ink);
+    padding: 12px 18px;
+    margin: 0;
+    border-radius: 14px;
+    background: none;
+    transition: background-color 0.2s ease;
+}
+.dropdown-content button:hover,
+.dropdown-content .room-button:hover {
+    background: rgba(255, 255, 255, 0.85);
+}
+
+/* ---------- Hotspot-Buttons im 3D-Modell ---------- */
+.view-button,
+.info-button {
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    padding: 11px 22px;
+    border-radius: 999px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-shadow), var(--glass-highlight);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+}
+.view-button:hover,
+.info-button:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.92);
+}
+.info-button {
+    color: #fff;
+    background: rgba(28, 27, 26, 0.78);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+.info-button:hover {
+    background: rgba(28, 27, 26, 0.92);
+}
+
+/* ---------- Untere Leiste: Zurück / Ganzes Haus / Weiter ---------- */
+#switch-room-button-container {
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    gap: 12px;
+    z-index: 20;
+}
+
+#switch-room-button-container button {
+    width: auto;
+    min-width: 130px;
+    margin: 0;
+    padding: 14px 24px;
+    font-family: var(--font-sans);
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+    border-radius: 999px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-shadow), var(--glass-highlight);
+    transition: background-color 0.25s ease, transform 0.25s ease, opacity 0.3s ease, visibility 0.3s ease;
+}
+#switch-room-button-container button:hover {
+    background: rgba(255, 255, 255, 0.75);
+    transform: translateY(-2px);
+}
+#switch-room-button-container .full-house-button {
+    color: #fff;
+    background: rgba(28, 27, 26, 0.78);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+#switch-room-button-container .full-house-button:hover {
+    background: rgba(28, 27, 26, 0.92);
+}
+
+/* ---------- Info-Fenster ---------- */
+#info-window {
+    border-radius: 28px 28px 0 0;
+}
+#close-info-window {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow), var(--glass-highlight);
+    font-size: 26px;
+    line-height: 1;
+    color: var(--ink);
+}
+
+/* Fallback, wenn der Browser keinen Glas-Effekt kann */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    #navbar, .dropdown-content, .view-button, #switch-room-button-container button {
+        background: rgba(255, 255, 255, 0.92);
+    }
+}
+
+/* ---------- Mobil ---------- */
+@media (max-width: 767px) {
+    #navbar {
+        top: 10px;
+        width: calc(100% - 20px);
+        height: 54px;
+        padding: 0 6px 0 18px;
+    }
+    .sarah-wewer { font-size: 1.2rem; }
+    #navigation-buttons { gap: 0; }
+    .navigation-button {
+        font-size: 0.85rem;
+        padding: 10px 11px;
+    }
+    .chevron { margin-left: 6px; width: 6px; height: 6px; }
+    .dropdown-content {
+        position: fixed;
+        top: 74px;
+        left: 10px;
+        right: 10px;
+        min-width: 0;
+    }
+    .dropdown-content::before { display: none; }
+    .dropdown:hover:not(.open) .dropdown-content { display: none; }
+
+    #switch-room-button-container {
+        gap: 8px;
+        width: calc(100% - 20px);
+        bottom: calc(16px + env(safe-area-inset-bottom));
+    }
+    #switch-room-button-container button {
+        min-width: 0;
+        flex: 1 1 0;
+        padding: 13px 10px;
+        font-size: 0.85rem;
+    }
+}
+
+
+/* Kein seitliches Verrutschen der Seite */
+html, body { overflow: hidden; }
+
+/* Schmale Handys: Name oben, Buttons darunter */
+@media (max-width: 520px) {
+    #navbar {
+        height: auto;
+        flex-direction: column;
+        gap: 2px;
+        padding: 10px 8px 6px;
+        border-radius: 26px;
+    }
+    .sarah-wewer { font-size: 1.25rem; }
+    #navigation-buttons { width: 100%; justify-content: center; }
+    .navigation-button { padding: 9px 13px; font-size: 0.85rem; }
+    .dropdown-content { top: 112px; }
+}
+
+/* Info-Fenster: zwischengespeicherte Unterseiten */
+#info-window-content iframe[hidden],
+#info-window-content .info-text[hidden] { display: none; }
+#info-window-content iframe { background: #fff; }
+.info-text { padding: 40px 8px; font-size: 1rem; }

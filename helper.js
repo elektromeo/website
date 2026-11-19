@@ -47,14 +47,88 @@ document.addEventListener('DOMContentLoaded', function() {
         hotspot.addEventListener('click', () => annotationClicked(hotspot));
     });
 
-    //function to show the info overlay with iframes inside
+    ////////////////////////////////////////////////////////////////// Info pages (cached iframes)
+
+    // Each page from the art subdomain is loaded only once per visit and then kept alive
+    // (hidden) in the info window, so opening it again is instant.
+    const frameCache = {};
+    const infoText = document.createElement('div');
+    infoText.className = 'info-text';
+    infoWindowContent.appendChild(infoText);
+
+    function getUrl(infoContent) {
+        const match = infoContent && infoContent.content.match(/src="([^"]+)"/);
+        return match ? match[1] : null;
+    }
+
+    function getFrame(url, title) {
+        if (!frameCache[url]) {
+            const frame = document.createElement('iframe');
+            frame.src = url;
+            frame.title = title || '';
+            frame.hidden = true;
+            infoWindowContent.appendChild(frame);
+            frameCache[url] = frame;
+        }
+        return frameCache[url];
+    }
+
+    //function to show the info overlay with the (cached) iframe inside
     function showInfoWindow(title, content) {
         infoWindowTitle.textContent = title;
-        infoWindowContent.innerHTML = content;
+        Object.values(frameCache).forEach(frame => frame.hidden = true);
+        const url = getUrl({ content });
+        if (url) {
+            infoText.hidden = true;
+            getFrame(url, title).hidden = false;
+        } else {
+            infoText.innerHTML = content;
+            infoText.hidden = false;
+        }
         infoWindow.classList.add('visible');
     }
 
-    //function to hide the info overlay 
+    //on mobile: open the page in a new tab instead of the overlay
+    function openInfo(infoContent) {
+        const url = getUrl(infoContent);
+        if (isMobile() && url) {
+            window.open(url, '_blank', 'noopener');
+            return;
+        }
+        showInfoWindow(infoContent.title, infoContent.content);
+    }
+
+    // Desktop: after the 3D model is loaded, quietly preload all pages one after another
+    function preloadInfoPages() {
+        if (isMobile()) return;
+        const connection = navigator.connection;
+        if (connection && (connection.saveData || /2g/.test(connection.effectiveType || ''))) return;
+
+        const queue = [];
+        Object.values(roomInformation).forEach(room => {
+            Object.values(room).forEach(info => {
+                const url = getUrl(info);
+                if (url && !queue.includes(url)) queue.push(url);
+            });
+        });
+
+        const idle = window.requestIdleCallback
+            ? (cb) => window.requestIdleCallback(cb, { timeout: 2000 })
+            : (cb) => setTimeout(cb, 300);
+        const next = () => {
+            const url = queue.shift();
+            if (!url) return;
+            if (frameCache[url]) { idle(next); return; }
+            const frame = getFrame(url);
+            let done = false;
+            const go = () => { if (!done) { done = true; idle(next); } };
+            frame.addEventListener('load', go, { once: true });
+            setTimeout(go, 10000); // don't wait forever for a slow page
+        };
+        idle(next);
+    }
+
+    //function to hide the info overlay
     function hideInfoWindow() {
         infoWindow.classList.remove('visible');
     }
@@ -187,8 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
           const infoNumber = button.dataset.info || '1'; // Default to '1' if data-info is missing
           console.log('Button data:', button.dataset);
           console.log('Room:', roomNumber, 'Info:', infoNumber);
-          const infoContent = getInfoContent(roomNumber, infoNumber);
-          showInfoWindow(infoContent.title, infoContent.content);
+          openInfo(getInfoContent(roomNumber, infoNumber));
       });
     });
     
@@ -230,53 +303,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to toggle mobile view for testing
     function toggleMobileView() {
         window.forceMobileView = !window.forceMobileView;
-        handleMobileLayout();
     }
 
     //toggleMobileView(); // for Testing the mobile view
 
-    //function to show the mobile overlay
-    function showMobileOverlay() {
-        const overlay = document.getElementById('mobile-overlay');
-        overlay.classList.add('visible');
-
-        const closeButton = overlay.querySelector('.close-button');
-        closeButton.addEventListener('click', () => {
-            overlay.classList.remove('visible');
-        });
-    }
-
-    function handleMobileLayout() {
-        const sidebar = document.getElementById('sidebar');
-        
-        if (isMobile()) {
-            // Hide sidebar
-            if (sidebar) {
-                sidebar.style.display = 'none';
-            }
-            
-            // Show mobile overlay
-            showMobileOverlay();
-        } else {
-            // Show sidebar for non-mobile devices
-            if (sidebar) {
-                sidebar.style.display = 'block'; // or 'flex', depending on your layout
-            }
-        }
-    }
-
-    // Call this function when the page loads and on window resize
-    window.addEventListener('load', handleMobileLayout);
-    window.addEventListener('resize', handleMobileLayout);
-
-    ////////////////////////////////////////////////////////////////// Loading Video
+    ////////////////////////////////////////////////////////////////// Loading Screen
 
     // Hide loading screen when the model is loaded
     modelViewer.addEventListener('load', () => {
         const loadingScreen = document.getElementById('loading-screen');
-        const loadingVideo = document.getElementById('loading-video');
         loadingScreen.classList.add('hidden');
-        loadingVideo.pause();
+        setTimeout(preloadInfoPages, 1500);
     });
 
     // Show loading screen if there's an error loading the model
@@ -356,14 +393,15 @@ observer.observe(document.body, { childList: true, subtree: true });
     const aboutButton = document.getElementById('navigation-button-about');
     const contactButton = document.getElementById('navigation-button-contact');
 
-    aboutButton.addEventListener('click', () => {
-        const infoContent = getInfoContent('about', '1');
-        showInfoWindow(infoContent.title, infoContent.content);
-    });
+    aboutButton.addEventListener('click', () => openInfo(getInfoContent('about', '1')));
+    contactButton.addEventListener('click', () => openInfo(getInfoContent('contact', '1')));
 
-    contactButton.addEventListener('click', () => {
-        const infoContent = getInfoContent('contact', '1');
-        showInfoWindow(infoContent.title, infoContent.content);
+    // Rooms dropdown: also opens on tap/click (hover alone does not work on touch screens)
+    const roomsDropdown = document.querySelector('.dropdown');
+    document.getElementById('navigation-button-rooms').addEventListener('click', (event) => {
+        event.stopPropagation();
+        roomsDropdown.classList.toggle('open');
     });
+    document.addEventListener('click', () => roomsDropdown.classList.remove('open'));
 
 });
